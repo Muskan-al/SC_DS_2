@@ -1,0 +1,116 @@
+# Import necessary libraries
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os
+
+# Define the file path to the Titanic dataset
+file_path = '/Users/11b51/Downloads/titanic.csv'  # Update this path if needed
+
+# Check if the file exists
+if os.path.exists(file_path):
+    print("File found!")
+    df = pd.read_csv(file_path)
+
+    # Preview the first few rows of the dataset
+    print(df.head())
+
+    # 1. Data Cleaning
+
+    # Check for missing values
+    print("Missing values:\n", df.isnull().sum())
+
+    # Fill missing 'Age' with median
+    df['Age'].fillna(df['Age'].median(), inplace=True)
+
+    # Fill missing 'Embarked' with the most common value (mode)
+    df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+
+    # Drop the 'Cabin' column as it has too many missing values
+    df.drop(columns=['Cabin'], inplace=True)
+
+    # Check for duplicate rows and remove them if any
+    df.drop_duplicates(inplace=True)
+
+    # Ensure 'Sex' and 'Embarked' are categorical variables
+    df['Sex'] = df['Sex'].astype('category')
+    df['Embarked'] = df['Embarked'].astype('category')
+
+    # Print basic information about the cleaned dataset
+    print("\nData after cleaning:")
+    print(df.info())
+
+    # 2. Exploratory Data Analysis (EDA)
+
+    # a. Summary statistics
+    print("\nSummary statistics for numerical columns:")
+    print(df.describe())
+
+    print("\nSummary statistics for categorical columns:")
+    print(df.describe(include='category'))
+
+    # b. Visualizing relationships between variables
+
+    # Distribution of Age
+    plt.figure(figsize=(8, 6))
+    sns.histplot(df['Age'], kde=True, color='skyblue')
+    plt.title('Age Distribution')
+    plt.xlabel('Age')
+    plt.ylabel('Frequency')
+    plt.show()
+
+    # Survival Rate by Gender
+    plt.figure(figsize=(8, 6))
+    sns.countplot(x='Sex', hue='Survived', data=df, palette='Set2')
+    plt.title('Survival Rate by Gender')
+    plt.xlabel('Gender')
+    plt.ylabel('Count')
+    plt.show()
+
+    # Class Distribution of Passengers
+    plt.figure(figsize=(8, 6))
+    sns.countplot(x='Pclass', data=df, palette='Set1')
+    plt.title('Class Distribution of Passengers')
+    plt.xlabel('Class')
+    plt.ylabel('Count')
+    plt.show()
+
+    # Correlation Heatmap
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(df.corr(), annot=True, cmap='coolwarm', linewidths=0.5)
+    plt.title('Correlation Heatmap')
+    plt.show()
+
+    # Boxplot of Age by Class
+    plt.figure(figsize=(8, 6))
+    sns.boxplot(x='Pclass', y='Age', data=df, palette='Set3')
+    plt.title('Age Distribution Across Passenger Classes')
+    plt.show()
+
+    # Survival Rate by Class and Gender
+    plt.figure(figsize=(8, 6))
+    sns.catplot(x='Sex', hue='Survived', col='Pclass', data=df, kind='count', palette='Set2')
+    plt.show()
+
+    # Fare distribution by Class
+    plt.figure(figsize=(8, 6))
+    sns.boxplot(x='Pclass', y='Fare', data=df, palette='Set3')
+    plt.title('Fare Distribution by Passenger Class')
+    plt.show()
+
+    # c. Identify relationships and patterns
+    # Compare survival rate by age
+    plt.figure(figsize=(8, 6))
+    sns.histplot(df[df['Survived'] == 1]['Age'], color='green', label='Survived', kde=True)
+    sns.histplot(df[df['Survived'] == 0]['Age'], color='red', label='Did not Survive', kde=True)
+    plt.title('Age Distribution of Survivors vs Non-survivors')
+    plt.xlabel('Age')
+    plt.ylabel('Frequency')
+    plt.legend()
+    plt.show()
+
+    # Overall survival rate
+    survival_rate = df['Survived'].mean() * 100
+    print(f"Overall survival rate: {survival_rate:.2f}%")
+else:
+    print("File not found. Please check the file path.")
